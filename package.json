@@ -1,0 +1,11 @@
+{
+  "name": "cache-bust-cli",
+  "version": "1.0.0-alpha.5",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "0.22.0"
+  }
+}
