@@ -1,6 +1,7 @@
 let cheerio = require("cheerio"),
     fs = require("fs"),
-    path = require("path");
+    path = require("path"),
+    readdirSync = require("./readdir-recursive");
 
 let args = process.argv.slice(2);
 
@@ -8,13 +9,7 @@ let configFile = fs.readFileSync(args[0], "utf8");
 
 let config = JSON.parse(configFile);
 
-let hadBustedFile = false;
-
 readPaths();
-
-if (!hadBustedFile) {
-    throw "Did not find any files to bust!";
-}
 
 function bust(bustFile) {
     let file = fs.readFile(bustFile, "utf8", (err, data) => {
@@ -40,26 +35,11 @@ function bust(bustFile) {
 function readPaths() {
     let paths = config.paths;
 
-    paths.forEach(directory => {
-        var files = fs.readdirSync(directory);
-        
-        bustFiles(files, directory);
-    });
-}
+    var files = readdirSync(paths, file => path.extname(file) === config.filter);
 
-function bustFiles(files, directory) {
-    files.forEach(file => {
-        var bustFile = path.join(directory, file);
+    if (!files || files.length === 0) {
+        throw "Did not find any files to bust!";
+    }
 
-        if (path.extname(bustFile) !== config.filter) {
-            return;
-        };
-
-        var stats = fs.statSync(bustFile);
-
-        if (!stats.isDirectory()) {
-            hadBustedFile = true;
-            bust(bustFile);
-        }
-    })
+    files.forEach(file => bust(file));
 }
